@@ -81,23 +81,23 @@ app.get('/products', async (req, res) => {
 
   console.log(minPrice, " ", maxPrice);
 
-  // Convert brands to an array if it's a comma-separated string
+  // Converting brands to an array if it is a comma separated string.
   const brandArray = brands ? brands.split(',') : [];
 
-  // Create a query object
+  // Creating a query object.
   const query = {};
-  if (search) query.productName = { $regex: search, $options: 'i' }; // Case-insensitive search
+  if (search) query.productName = { $regex: search, $options: 'i' }; // Case-insensitive searching.
   if (category) query.category = category;
   if (brandArray.length > 0) query.brand = { $in: brandArray };
 
-  // Add price range to the query object
+  // Adding price range to the query object.
   if (minPrice || maxPrice) {
     query.price = {};
-    if (minPrice) query.price.$gte = parseFloat(minPrice); // Greater than or equal to minPrice
-    if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Less than or equal to maxPrice
+    if (minPrice) query.price.$gte = parseFloat(minPrice); 
+    if (maxPrice) query.price.$lte = parseFloat(maxPrice); 
   }
 
-  // Define the sort order
+  // Defining the sort order.
   const sortOrder = order === 'desc' ? -1 : 1;
 
   try {
