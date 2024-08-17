@@ -23,46 +23,96 @@ app.use(bodyParser.json());
 const productsCollection = () => db.collection('products');
 
 
+
 // Fetch products with pagination, search, categorization, and sorting
-// Fetch products with pagination, search, categorization, and sorting
+// app.get('/products', async (req, res) => {
+//     const {
+//       page = 1,
+//       limit = 10,
+//       search = '',
+//       category,
+//       brands,
+//       sort = 'productCreationDate',
+//       order = 'desc'
+//     } = req.query;
+//    console.log(      brands
+//    )
+//     // Create a query object
+//     const query = {};
+//     if (search) query.productName = { $regex: search, $options: 'i' }; // Case-insensitive search
+//     if (category) query.category = category;
+//     if (brands) query.brands = brands;
+  
+//     // Define the sort order
+//     const sortOrder = order === 'desc' ? -1 : 1;
+  
+//     try {
+//       const products = await productsCollection()
+//         .find(query)
+//         .sort({ [sort]: sortOrder })
+//         .skip((page - 1) * limit)
+//         .limit(parseInt(limit))
+//         .toArray();
+  
+//       const total = await productsCollection().countDocuments(query);
+  
+//       res.json({
+//         currentPage: parseInt(page),
+//         totalPages: Math.ceil(total / limit),
+//         totalProducts: total,
+//         products,
+//       });
+//     } catch (error) {
+//       res.status(500).json({ error: 'Failed to fetch products' });
+//     }
+//   });
 app.get('/products', async (req, res) => {
-    const {
-      page = 1,
-      limit = 10,
-      search = '',
-      category,
-      sort = 'productCreationDate',
-      order = 'desc'
-    } = req.query;
-  
-    // Create a query object
-    const query = {};
-    if (search) query.productName = { $regex: search, $options: 'i' }; // Case-insensitive search
-    if (category) query.category = category;
-  
-    // Define the sort order
-    const sortOrder = order === 'desc' ? -1 : 1;
-  
-    try {
-      const products = await productsCollection()
-        .find(query)
-        .sort({ [sort]: sortOrder })
-        .skip((page - 1) * limit)
-        .limit(parseInt(limit))
-        .toArray();
-  
-      const total = await productsCollection().countDocuments(query);
-  
-      res.json({
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
-        totalProducts: total,
-        products,
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch products' });
-    }
-  });
+  const {
+    page = 1,
+    limit = 10,
+    search = '',
+    category,
+    brands,
+    sort = 'productCreationDate',
+    order = 'desc'
+  } = req.query;
+
+  // console.log( brands);
+
+  // Convert brands to an array if it's a comma-separated string
+  const brandArray = brands ? brands.split(',') : [];
+
+  // Create a query object
+  const query = {};
+  if (search) query.productName = { $regex: search, $options: 'i' }; // Case-insensitive search
+  if (category) query.category = category;
+  if (brandArray.length > 0) query.brand = { $in: brandArray };
+
+  // Define the sort order
+  const sortOrder = order === 'desc' ? -1 : 1;
+
+  try {
+    const products = await productsCollection()
+      .find(query)
+      .sort({ [sort]: sortOrder })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .toArray();
+
+    const total = await productsCollection().countDocuments(query);
+
+    res.json({
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      totalProducts: total,
+      products,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+
   
   
 
