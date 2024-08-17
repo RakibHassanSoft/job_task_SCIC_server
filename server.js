@@ -74,10 +74,12 @@ app.get('/products', async (req, res) => {
     category,
     brands,
     sort = 'productCreationDate',
-    order = 'desc'
+    order = 'desc',
+    minPrice,
+    maxPrice
   } = req.query;
 
-  // console.log( brands);
+  console.log(minPrice, " ", maxPrice);
 
   // Convert brands to an array if it's a comma-separated string
   const brandArray = brands ? brands.split(',') : [];
@@ -87,6 +89,13 @@ app.get('/products', async (req, res) => {
   if (search) query.productName = { $regex: search, $options: 'i' }; // Case-insensitive search
   if (category) query.category = category;
   if (brandArray.length > 0) query.brand = { $in: brandArray };
+
+  // Add price range to the query object
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = parseFloat(minPrice); // Greater than or equal to minPrice
+    if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Less than or equal to maxPrice
+  }
 
   // Define the sort order
   const sortOrder = order === 'desc' ? -1 : 1;
@@ -111,6 +120,7 @@ app.get('/products', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
+
 
 
   
